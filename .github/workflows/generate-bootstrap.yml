@@ -1,0 +1,73 @@
+name: Generate Bootstrap Archives
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    name: Generate Bootstrap Archives (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/termux/package-builder:latest
+      env:
+        ANDROID_HOME: /github/home/lib/android-sdk
+        ANDROID_SDK_ROOT: /github/home/lib/android-sdk
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - aarch64
+          - arm
+
+    env:
+      NDK_VERSION: "r29"
+      NDK_DIR: "/github/home/lib/android-ndk-r29"
+      REPO_URL: "https://yatonorai.github.io/terminal-packages/apt/termux-main"
+
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Android NDK
+        shell: bash
+        run: |
+          mkdir -p /github/home/lib
+          if [ ! -d "${NDK_DIR}" ]; then
+            echo "Downloading Android NDK ${NDK_VERSION}..."
+            curl -fLo /tmp/ndk.zip \
+              "https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
+            unzip -q /tmp/ndk.zip -d /github/home/lib/
+            rm /tmp/ndk.zip
+          fi
+
+      - name: Download packages artifact (${{ matrix.arch }})
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-${{ matrix.arch }}
+          path: output/${{ matrix.arch }}/
+        continue-on-error: true
+
+      - name: Generate bootstrap archive (debug)
+        shell: bash
+        run: |
+          bash generate-bootstrap-archive.sh \
+            -r "${REPO_URL}"
+
+      - name: Generate bootstrap archive (release)
+        shell: bash
+        run: |
+          bash generate-bootstrap-archive.sh \
+            -g \
+            -r "${REPO_URL}"
+
+      - name: Upload bootstrap archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-${{ matrix.arch }}
+          path: |
+            output/bootstrap-*-${{ matrix.arch }}.zip
+            output/bootstrap-*-${{ matrix.arch }}.zip.9
+          retention-days: 30
