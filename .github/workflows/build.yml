@@ -16,7 +16,6 @@ on:
         default: 'false'
         type: boolean
 
-# Cancel in-progress runs on the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -28,16 +27,19 @@ jobs:
   build:
     name: Build (${{ matrix.arch }})
     runs-on: ubuntu-latest
-    timeout-minutes: 360   # 6 h — same as the GitLab pipeline
+    timeout-minutes: 360
     container:
       image: ghcr.io/termux/package-builder:latest
 
     strategy:
-      fail-fast: false      # keep building the other arch if one fails
+      fail-fast: false
       matrix:
         arch:
           - aarch64
           - arm
+
+    env:
+      REPO_URL: "https://YatoNorai.github.io/terminal-packages/apt/termux-main"
 
     steps:
       - name: Checkout repository (with submodules)
@@ -51,12 +53,12 @@ jobs:
           bash -x build.sh \
             -a "${{ matrix.arch }}" \
             -p "com.yato.fl_ide" \
-            -r "${{ vars.FL_IDE_REPO_URL || 'https://raw.githubusercontent.com/${{ github.repository_owner }}/fl-ide-packages/main/apt/termux-main' }}" \
+            -r "${REPO_URL}" \
             -s adfa-dev-team.gpg
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
-        if: always()   # upload even on failure so logs are accessible
+        if: always()
         with:
           name: packages-${{ matrix.arch }}
           path: output/${{ matrix.arch }}/
@@ -133,8 +135,7 @@ jobs:
           retention-days: 7
 
   # ────────────────────────────────────────────────
-  # Job 3 — Publish repository to GitHub Pages
-  #          (or swap for rsync/S3 if preferred)
+  # Job 3 — Publish repository to branch packages
   # ────────────────────────────────────────────────
   publish:
     name: Publish Repository
@@ -144,13 +145,13 @@ jobs:
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && inputs.publish == 'true')
     permissions:
-      contents: write   # needed to push to the packages branch
+      contents: write
 
     steps:
       - name: Checkout packages branch
         uses: actions/checkout@v4
         with:
-          ref: packages          # dedicated branch that serves as the repo root
+          ref: packages
           path: packages-branch
           fetch-depth: 0
 
@@ -162,14 +163,11 @@ jobs:
 
       - name: Copy repository files to packages branch
         run: |
-          # Mirror under apt/termux-main — adjust path to match your repo URL
           mkdir -p packages-branch/apt/termux-main
           cp -r apt-repo/* packages-branch/apt/termux-main/
 
       - name: Commit & push
         working-directory: packages-branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.email "ci@fl-ide.dev"
           git config user.name "FL IDE CI"
@@ -183,7 +181,6 @@ jobs:
 
   # ────────────────────────────────────────────────
   # Job 4 — Generate bootstrap archives
-  #          (optional — runs on demand or on main)
   # ────────────────────────────────────────────────
   bootstrap:
     name: Generate Bootstrap Archives
