@@ -62,7 +62,8 @@ for arch in "${ARCHS[@]}"; do
         -maxdepth 1\
         -type f\
         -name "*.deb"\
-        -exec ln -sf {} "$debs_dir/" \; ||\
+        -exec cp {} "$debs_dir/" \; ||\
+       # -exec ln -sf {} "$debs_dir/" \; ||\
         scribe_error_exit "Failed to symlink '$arch' debs"
 done
 
