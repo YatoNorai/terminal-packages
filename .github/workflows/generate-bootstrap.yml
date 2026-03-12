@@ -5,13 +5,10 @@ on:
 
 jobs:
   bootstrap:
-    name: Generate Bootstrap Archives (${{ matrix.arch }})
+    name: Generate Bootstrap (${{ matrix.arch }})
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/termux/package-builder:latest
-      env:
-        ANDROID_HOME: /github/home/lib/android-sdk
-        ANDROID_SDK_ROOT: /github/home/lib/android-sdk
 
     strategy:
       fail-fast: false
@@ -43,12 +40,11 @@ jobs:
             rm /tmp/ndk.zip
           fi
 
-      - name: Download packages artifact (${{ matrix.arch }})
-        uses: actions/download-artifact@v4
-        with:
-          name: packages-${{ matrix.arch }}
-          path: output/${{ matrix.arch }}/
-        continue-on-error: true
+      - name: Create output directories
+        shell: bash
+        run: |
+          mkdir -p output/${{ matrix.arch }}
+          mkdir -p output/repo
 
       - name: Generate bootstrap archive (debug)
         shell: bash
