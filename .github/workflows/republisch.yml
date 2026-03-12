@@ -1,0 +1,102 @@
+name: Regenerate & Publish APT Repository
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-apt-repo:
+    name: Generate APT Repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download aarch64 packages
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-aarch64
+          path: output/aarch64/
+
+      - name: Download arm packages
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-arm
+          path: output/arm/
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            gnupg wget ca-certificates python3
+
+      - name: Import GPG signing key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | base64 -d | gpg --batch --import
+          gpg --list-secret-keys
+
+      - name: Generate APT repository
+        run: bash generate-apt-repo.sh
+
+      - name: Sign the APT repository
+        env:
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+          GPG_KEY_PASSPHRASE: ${{ secrets.GPG_KEY_PASSPHRASE }}
+        run: |
+          echo "$GPG_KEY_PASSPHRASE" | gpg \
+            --batch --yes \
+            --passphrase-fd 0 \
+            --pinentry-mode loopback \
+            --digest-algo SHA256 \
+            --clearsign \
+            -u "${GPG_KEY_ID}" \
+            -o ./output/repo/dists/stable/InRelease \
+            ./output/repo/dists/stable/Release
+
+      - name: Upload signed APT repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: apt-repo
+          path: output/repo/
+          retention-days: 7
+
+  publish:
+    name: Publish Repository
+    runs-on: ubuntu-latest
+    needs: generate-apt-repo
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout packages branch
+        uses: actions/checkout@v4
+        with:
+          ref: packages
+          path: packages-branch
+          fetch-depth: 0
+
+      - name: Download signed APT repository
+        uses: actions/download-artifact@v4
+        with:
+          name: apt-repo
+          path: apt-repo/
+
+      - name: Copy repository files to packages branch
+        run: |
+          mkdir -p packages-branch/apt/termux-main
+          cp -r apt-repo/* packages-branch/apt/termux-main/
+
+      - name: Commit & push
+        working-directory: packages-branch
+        run: |
+          git config user.email "ci@fl-ide.dev"
+          git config user.name "FL IDE CI"
+          git add apt/
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: apt repo update for ${{ github.sha }}"
+            git push origin packages
+          else
+            echo "No changes to publish."
+          fi
