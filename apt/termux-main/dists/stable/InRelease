@@ -3,10 +3,10 @@ Hash: SHA256
 
 Codename: termux
 Version: 1
-Architectures: all aarch64 arm
+Architectures: arm aarch64 all
 Description: stable repository
 Suite: stable
-Date: Thu, 12 Mar 2026 15:09:10 UTC
+Date: Thu, 12 Mar 2026 17:31:48 UTC
 Components: main
 MD5Sum:
  291ac4bc5745ad28da8a2a70f3cb8454 203033 main/binary-arm/Packages
@@ -62,17 +62,17 @@ SHA512:
  af2003ed91f3f95d5fda7e33d8c20afc37a7e86c36cd81d9f5f038ab0a1cb45c1ea6f33d22d42cb87c7d31f5d6a26a41557d72dfebff74e1383d924b56424bc5 243920 main/Contents-aarch64.xz
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCAAdFiEEcPKSPQr+OXFc3QE6d/FuJVhxPk8FAmmy1yAACgkQd/FuJVhx
-Pk8N5hAAlbQn1B2dh8/1EOC2ct/DYbAcsWxOzzIa2xL3wVTb9qy2q6s1xEeT4lMi
-aeTJrbqggAFTPhyQxq2TeHmqH0lCBVcmEdhwSPkBZjHVlXsijsxQwimybFUrzQ+F
-Sv264dAOQOO3lRlduqPkiJNvcnXWuPK0zEtzV36wgIamn/4L1m6VmvhCM4m4Pa9W
-eJQnea+NP/ZoxEaPuEOef2w9SVPsIfJRgMtGSe6YM4RbOR6Y9IIpQ9nEYG55JDsw
-XC3wj1lDkzeke7siScIcZpqwGu0ykNZw2MsZ2xm43QB3vWCH9snJJaLbyMCE0HX6
-sjpvrXul6Fk0bjG7bAHjh9FhEhHdm+14/jc/tDx5rQN2toZGYdm/ImaKGcPH2Oc6
-FE1gSxn4cZ5aG+3EaRrvLP7PLHx7OlMRKvi+rKbMGKP7Rn+0n0UuXNMaHpMpLLd6
-ldc2I0ateIJ25UcvIBi02YR8X4mDZAApmu8HomtxEFcXP6j1z/OO/7/Gf3u8H/SW
-RJsgrSbzp4izgt2pzCFoXF5Y2wl3ahz0SXQE7JpjzT3SSzpDrrpe82/13UC0joVr
-OaN1tWNznx0jyt5933O6bdP3MAI5pOPrCl8E3BX9PH8fmTqBBmV3BqeunI5mQbv3
-IcQpxq11VbC8sFfR7MItYnogkNu+1fOd35FRQI/YghSKXq4m14s=
-=l4Xn
+iQIzBAEBCAAdFiEEcPKSPQr+OXFc3QE6d/FuJVhxPk8FAmmy+I4ACgkQd/FuJVhx
+Pk9R1g//SK3EUQgFKm+W2ybLOXkwfHQm/JItXq1wIgmLBHzFzm2ZF7lKLPqUbHwR
+jpW2+DYsXnjZmRprZgN00r7p+Fou8EspRXUuyzCo9dDc+9ZtdiiniNrjYetsR47F
+1x9Tqrnt/NnWIIDr4e/Gt0uvVigbxVRSVyVE9zXXHjfiNHzLtqkPhjFLiYnXzc7t
+ga6fNgsLs8Sup6G3/dDNq06NlSvlD5q5Y0E8BFVNiXjfDnn5W9wyflR+LTREAVEt
+hCfzGKhhcdgmurVW90jPuxVNtJIdyBUUgD+b8F556FtSNT2xCWP8IDBWu+wWaNUc
+iTj2SEOP4IVlM5AKp62ZyuzRkNHqoAZ0SjUQcUufeBglMGSBDZUj+fOI6OKw6nsk
+4GI/6jshnpl6kEBct41tcliRMgD+/8M4yKPb5lrf2Bfd6fqAOHNDkSsyBogS04zf
+uIZtrvSLZ10qnMfg6Yhtv/QUKkhlDwB3MQr3Kd05hNSFMeo4HQAAk6T8As0RX9qg
+88PESLN1sCjEhF1CjzFYdx0eOhWy8f59NGRfpk/OnmtOH+RO7c7upKs5kNJ0jstn
+7YfowENOIGTqqwwQsuGGzOv1vGd/FpWtbb1UxKIBBn9DrWvwO8mc66WLA82k0vGA
+b8Zui3wWjSk4c5qX6pnBYAsRlB1bAzMq3D/jlttUQS4WvexxZNs=
+=a28O
 -----END PGP SIGNATURE-----
