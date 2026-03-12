@@ -43,45 +43,72 @@ jobs:
         shell: bash
         run: mkdir -p output/${{ matrix.arch }} output/repo
 
-      - name: Download and fix Packages index
+      - name: Create dummy debs and local mirror
         shell: bash
         run: |
           ARCH="${{ matrix.arch }}"
           MIRROR="/tmp/mirror"
           mkdir -p "$MIRROR/dists/stable/main/binary-${ARCH}"
           mkdir -p "$MIRROR/dists/stable/main/binary-all"
+          mkdir -p "$MIRROR/pool/main"
 
-          curl -fsSL "${REPO_URL}/dists/stable/Release" -o "$MIRROR/dists/stable/Release"
-          curl -fsSL "${REPO_URL}/dists/stable/InRelease" -o "$MIRROR/dists/stable/InRelease"
+          # Cria .deb vazio para command-not-found
+          for pkg in command-not-found bash-completion; do
+            TMPDIR=$(mktemp -d)
+            mkdir -p "$TMPDIR/DEBIAN"
+            cat > "$TMPDIR/DEBIAN/control" << CTRL
+          Package: ${pkg}
+          Version: 1.0
+          Architecture: ${ARCH}
+          Maintainer: dummy
+          Description: Dummy package
+          CTRL
+            dpkg-deb --build "$TMPDIR" \
+              "$MIRROR/pool/main/${pkg}_1.0_${ARCH}.deb"
+            rm -rf "$TMPDIR"
+            echo "Criado dummy: ${pkg}"
+          done
+
+          # Baixa arquivos do repo real
+          curl -fsSL "${REPO_URL}/dists/stable/Release" \
+            -o "$MIRROR/dists/stable/Release"
+          curl -fsSL "${REPO_URL}/dists/stable/InRelease" \
+            -o "$MIRROR/dists/stable/InRelease"
           curl -fsSL "${REPO_URL}/dists/stable/main/binary-all/Packages" \
             -o "$MIRROR/dists/stable/main/binary-all/Packages"
           curl -fsSL "${REPO_URL}/dists/stable/main/binary-${ARCH}/Packages" \
             -o "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
 
-          # Remove Recommends problemáticos usando sed
-          sed -i '/^Recommends:.*command-not-found/d' \
-            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
-          sed -i 's/Recommends: command-not-found, bash-completion//' \
-            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
-          sed -i 's/Recommends: bash-completion, command-not-found//' \
-            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
-          sed -i 's/, command-not-found//' \
-            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
-          sed -i 's/command-not-found, //' \
+          # Adiciona os dummy debs no Packages index
+          for pkg in command-not-found bash-completion; do
+            DEB="$MIRROR/pool/main/${pkg}_1.0_${ARCH}.deb"
+            SIZE=$(wc -c < "$DEB")
+            SHA256=$(sha256sum "$DEB" | cut -d' ' -f1)
+            cat >> "$MIRROR/dists/stable/main/binary-${ARCH}/Packages" << PKG
+
+          Package: ${pkg}
+          Version: 1.0
+          Architecture: ${ARCH}
+          Maintainer: dummy
+          Installed-Size: 0
+          Description: Dummy package
+          Filename: pool/main/${pkg}_1.0_${ARCH}.deb
+          Size: ${SIZE}
+          SHA256: ${SHA256}
+          PKG
+          done
+
+          echo "=== Packages atualizado ==="
+          grep -A 5 "^Package: bash$" \
             "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
 
-          echo "=== Verificando bash no Packages ==="
-          grep -A 8 "^Package: bash$" "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
-
-      - name: Start mirror server
-        shell: bash
-        run: |
-          REAL_REPO="${REPO_URL}"
-          cat > /tmp/server.py << EOF
-          import os, urllib.request, urllib.error
+          # Inicia servidor local
+          cat > /tmp/server.py << 'PYEOF'
+          import os
+          import urllib.request
           from http.server import HTTPServer, BaseHTTPRequestHandler
 
-          REAL = "${REAL_REPO}"
+          REAL = os.environ["REPO_URL"]
           MIRROR = "/tmp/mirror"
 
           class H(BaseHTTPRequestHandler):
@@ -93,7 +120,7 @@ jobs:
                   else:
                       try:
                           data = urllib.request.urlopen(REAL + self.path).read()
-                      except:
+                      except Exception:
                           self.send_response(404)
                           self.end_headers()
                           return
@@ -103,12 +130,10 @@ jobs:
                   self.wfile.write(data)
 
           HTTPServer(("0.0.0.0", 8080), H).serve_forever()
-          EOF
+          PYEOF
           python3 /tmp/server.py &
           sleep 2
-          echo "Servidor iniciado!"
-          curl -s "http://localhost:8080/dists/stable/main/binary-${{ matrix.arch }}/Packages" \
-            | grep -A 5 "^Package: bash$"
+          echo "Servidor pronto!"
 
       - name: Generate bootstrap archive (debug)
         shell: bash
