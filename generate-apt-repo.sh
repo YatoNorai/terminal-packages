@@ -39,6 +39,17 @@ repo_dir="${COTG_REPO_DIR}"
 debs_dir="$output_dir/debs"
 termux_apt_repo="$output_dir/termux-apt-repo"
 
+# Fix Filename paths e cria estrutura pool/
+echo "Fixing Filename paths in Packages index..."
+mkdir -p "$repo_dir/pool/main"
+cp "$debs_dir"/*.deb "$repo_dir/pool/main/" 2>/dev/null || true
+
+for packages_file in $(find "$repo_dir/dists" -name "Packages"); do
+    sed -i 's|Filename: dists/stable/main/binary-.*/|Filename: pool/main/|g' "$packages_file"
+    # Regenera o Packages.xz
+    xz -k -f "$packages_file"
+done
+
 # Clean
 rm -rf "$debs_dir"
 rm -rf "$repo_dir"
