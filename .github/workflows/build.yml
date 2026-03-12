@@ -40,12 +40,30 @@ jobs:
 
     env:
       REPO_URL: "https://YatoNorai.github.io/terminal-packages/apt/termux-main"
+      NDK_VERSION: "r29"
+      NDK_DIR: "/github/home/lib/android-ndk-r29"
 
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup Android NDK
+        run: |
+          mkdir -p /github/home/lib
+          if [ ! -d "${NDK_DIR}" ]; then
+            echo "Downloading Android NDK ${NDK_VERSION}..."
+            curl -fLo /tmp/ndk.zip \
+              "https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
+            echo "Extracting NDK..."
+            unzip -q /tmp/ndk.zip -d /github/home/lib/
+            rm /tmp/ndk.zip
+            echo "NDK installed at ${NDK_DIR}"
+          else
+            echo "NDK already present."
+          fi
+          ls "${NDK_DIR}"
 
       - name: Build packages
         run: |
@@ -190,11 +208,25 @@ jobs:
     container:
       image: ghcr.io/termux/package-builder:latest
 
+    env:
+      NDK_VERSION: "r29"
+      NDK_DIR: "/github/home/lib/android-ndk-r29"
+
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup Android NDK
+        run: |
+          mkdir -p /github/home/lib
+          if [ ! -d "${NDK_DIR}" ]; then
+            curl -fLo /tmp/ndk.zip \
+              "https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
+            unzip -q /tmp/ndk.zip -d /github/home/lib/
+            rm /tmp/ndk.zip
+          fi
 
       - name: Download aarch64 packages
         uses: actions/download-artifact@v4
