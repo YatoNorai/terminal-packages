@@ -1,0 +1,8 @@
+--- a/packages/bash/build.sh
++++ b/packages/bash/build.sh
+@@ -1,7 +1,6 @@
+ TERMUX_PKG_HOMEPAGE=https://www.gnu.org/software/bash/
+ TERMUX_PKG_DESCRIPTION="A sh-compatible shell that incorporates useful features from the Korn shell (ksh) and C shell (csh)"
+ TERMUX_PKG_LICENSE="GPL-3.0"
+-TERMUX_PKG_RECOMMENDS="command-not-found, bash-completion"
+ TERMUX_PKG_MAINTAINER="Joshua Kahn @TomJo2000"
