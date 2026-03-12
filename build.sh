@@ -26,6 +26,8 @@ script_dir=$(dirname "$script")
 . "${script_dir}/common.sh"
 
 declare -a PATCHES=(
+    # Fix giflib download URL (SourceForge mirror broken)
+    "giflib-fix-srcurl.patch"
 
     # Adds our own GPG keys
     "termux-keyring.patch"
