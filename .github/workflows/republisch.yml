@@ -2,6 +2,11 @@ name: Regenerate & Publish APT Repository
 
 on:
   workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Run ID do build anterior (ex: 22994743390)'
+        required: true
+        default: '22994743390'
 
 jobs:
   generate-apt-repo:
@@ -16,12 +21,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: packages-aarch64
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: output/aarch64/
 
       - name: Download arm packages
         uses: actions/download-artifact@v4
         with:
           name: packages-arm
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: output/arm/
 
       - name: Install dependencies
@@ -58,7 +67,7 @@ jobs:
       - name: Upload signed APT repository
         uses: actions/upload-artifact@v4
         with:
-          name: apt-repo
+          name: apt-repo-new
           path: output/repo/
           retention-days: 7
 
@@ -80,7 +89,7 @@ jobs:
       - name: Download signed APT repository
         uses: actions/download-artifact@v4
         with:
-          name: apt-repo
+          name: apt-repo-new
           path: apt-repo/
 
       - name: Copy repository files to packages branch
@@ -95,7 +104,7 @@ jobs:
           git config user.name "FL IDE CI"
           git add apt/
           if ! git diff --cached --quiet; then
-            git commit -m "chore: apt repo update for ${{ github.sha }}"
+            git commit -m "chore: apt repo regenerated with fixed Filename paths"
             git push origin packages
           else
             echo "No changes to publish."
