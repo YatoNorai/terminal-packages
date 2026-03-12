@@ -46,18 +46,57 @@ jobs:
           mkdir -p output/${{ matrix.arch }}
           mkdir -p output/repo
 
+      - name: Remove Recommends from Packages index
+        shell: bash
+        run: |
+          # Baixa o índice de pacotes
+          mkdir -p /tmp/apt-fix
+          curl -fsSL "${REPO_URL}/dists/stable/main/binary-${{ matrix.arch }}/Packages" \
+            -o /tmp/apt-fix/Packages
+
+          # Remove linhas Recommends que referenciam pacotes não disponíveis
+          sed -i '/^Recommends:.*command-not-found/d' /tmp/apt-fix/Packages
+          sed -i '/^Recommends:.*bash-completion/d' /tmp/apt-fix/Packages
+
+          echo "Packages corrigido:"
+          grep -A 5 "^Package: bash$" /tmp/apt-fix/Packages
+
+          # Substitui o script generate-bootstraps para usar o Packages local
+          # Cria um servidor HTTP local temporário para servir o Packages corrigido
+          mkdir -p /tmp/fake-repo/dists/stable/main/binary-${{ matrix.arch }}
+          mkdir -p /tmp/fake-repo/dists/stable/main/binary-all
+          mkdir -p /tmp/fake-repo/pool/main
+
+          # Copia Packages corrigido
+          cp /tmp/apt-fix/Packages \
+            "/tmp/fake-repo/dists/stable/main/binary-${{ matrix.arch }}/Packages"
+
+          # Baixa outros Packages necessários
+          curl -fsSL "${REPO_URL}/dists/stable/main/binary-all/Packages" \
+            -o /tmp/fake-repo/dists/stable/main/binary-all/Packages 2>/dev/null || true
+          curl -fsSL "${REPO_URL}/dists/stable/InRelease" \
+            -o /tmp/fake-repo/dists/stable/InRelease 2>/dev/null || true
+          curl -fsSL "${REPO_URL}/dists/stable/Release" \
+            -o /tmp/fake-repo/dists/stable/Release 2>/dev/null || true
+
+          # Inicia servidor HTTP local na porta 8080
+          cd /tmp/fake-repo
+          python3 -m http.server 8080 &
+          echo "Servidor local iniciado!"
+          sleep 2
+
       - name: Generate bootstrap archive (debug)
         shell: bash
         run: |
           bash generate-bootstrap-archive.sh \
-            -r "${REPO_URL}"
+            -r "http://localhost:8080"
 
       - name: Generate bootstrap archive (release)
         shell: bash
         run: |
           bash generate-bootstrap-archive.sh \
             -g \
-            -r "${REPO_URL}"
+            -r "http://localhost:8080"
 
       - name: Upload bootstrap archives
         uses: actions/upload-artifact@v4
