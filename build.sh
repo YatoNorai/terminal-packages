@@ -26,6 +26,9 @@ script_dir=$(dirname "$script")
 . "${script_dir}/common.sh"
 
 declare -a PATCHES=(
+    # Remove command-not-found from bash Recommends (not available in our repo)
+    "bash-remove-recommends.patch"
+    
     # Fix giflib download URL (SourceForge mirror broken)
     "giflib-fix-srcurl.patch"
 
