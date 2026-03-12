@@ -3,10 +3,10 @@ Hash: SHA256
 
 Codename: termux
 Version: 1
-Architectures: arm aarch64 all
+Architectures: arm all aarch64
 Description: stable repository
 Suite: stable
-Date: Thu, 12 Mar 2026 17:31:48 UTC
+Date: Thu, 12 Mar 2026 17:42:59 UTC
 Components: main
 MD5Sum:
  291ac4bc5745ad28da8a2a70f3cb8454 203033 main/binary-arm/Packages
@@ -62,17 +62,17 @@ SHA512:
  af2003ed91f3f95d5fda7e33d8c20afc37a7e86c36cd81d9f5f038ab0a1cb45c1ea6f33d22d42cb87c7d31f5d6a26a41557d72dfebff74e1383d924b56424bc5 243920 main/Contents-aarch64.xz
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCAAdFiEEcPKSPQr+OXFc3QE6d/FuJVhxPk8FAmmy+I4ACgkQd/FuJVhx
-Pk9R1g//SK3EUQgFKm+W2ybLOXkwfHQm/JItXq1wIgmLBHzFzm2ZF7lKLPqUbHwR
-jpW2+DYsXnjZmRprZgN00r7p+Fou8EspRXUuyzCo9dDc+9ZtdiiniNrjYetsR47F
-1x9Tqrnt/NnWIIDr4e/Gt0uvVigbxVRSVyVE9zXXHjfiNHzLtqkPhjFLiYnXzc7t
-ga6fNgsLs8Sup6G3/dDNq06NlSvlD5q5Y0E8BFVNiXjfDnn5W9wyflR+LTREAVEt
-hCfzGKhhcdgmurVW90jPuxVNtJIdyBUUgD+b8F556FtSNT2xCWP8IDBWu+wWaNUc
-iTj2SEOP4IVlM5AKp62ZyuzRkNHqoAZ0SjUQcUufeBglMGSBDZUj+fOI6OKw6nsk
-4GI/6jshnpl6kEBct41tcliRMgD+/8M4yKPb5lrf2Bfd6fqAOHNDkSsyBogS04zf
-uIZtrvSLZ10qnMfg6Yhtv/QUKkhlDwB3MQr3Kd05hNSFMeo4HQAAk6T8As0RX9qg
-88PESLN1sCjEhF1CjzFYdx0eOhWy8f59NGRfpk/OnmtOH+RO7c7upKs5kNJ0jstn
-7YfowENOIGTqqwwQsuGGzOv1vGd/FpWtbb1UxKIBBn9DrWvwO8mc66WLA82k0vGA
-b8Zui3wWjSk4c5qX6pnBYAsRlB1bAzMq3D/jlttUQS4WvexxZNs=
-=a28O
+iQIzBAEBCAAdFiEEcPKSPQr+OXFc3QE6d/FuJVhxPk8FAmmy+y4ACgkQd/FuJVhx
+Pk9v5g/8CVOjO9bU7mOZdFgVbvqdNs/zcS9BRe+/7j2eYZHAq69JgalYd9H8KRTs
+MQQvMr0NLKV9KnurV8iAywP7OV0ApbDSqRIukA9UetUItKVdDCEEVGxGZvP1EgoA
+SFcRxAmU+YgRQCQbnUqvbTrGsrFrpjklSC5e46XKYMzTauWrRAQsizHCPeL/DqDm
+NFgQpxi8SsCFHej9VUC1/2X9JU6uUuBBKMLF4TsSjpurPKGG3hRjyfSViqUsr2Um
+RJqdYD2Qgk5pAa6Q+Cm9BnW6mbflO+aaZCZLVtgVUafjLvHNJv+LNP77YUax8uIT
+bUN03xuA3+LSZZjsD7P0l7EpwkwS7PwlAqPo5c5lbmVx1OIiaeW6KLfHnkk4zR5A
+3flsYxHGBDDRU97HdOioiQbC6J55OKd9HfGyctQg1FqlyWmSxss9g0wBQphXYZEJ
+hvREFQA2RxbnaB+3A5Jlxw4oop9YDDhk/ibgl0GCrsFx4ZWMVbqrg+sql6/1/dvW
+UaW9tmtmC75yjh0fHSujvo41qPa2JWtuoJ7I87viI0b/J06dRbt3bp7bXh/Ra2dO
+yqoC7BuBqNfWI8cRmSFDE0v4dTY4GnhuP8OoUD01dj3bG6BhU8sxLc8zEzYngTc7
+WpP6YdJmD5+zIv6goVrf3NPxxFCHgLLuxoxbnVpsGnsg4wmsCVg=
+=I744
 -----END PGP SIGNATURE-----
