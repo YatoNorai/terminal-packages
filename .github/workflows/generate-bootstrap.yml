@@ -33,7 +33,6 @@ jobs:
         run: |
           mkdir -p /github/home/lib
           if [ ! -d "${NDK_DIR}" ]; then
-            echo "Downloading Android NDK ${NDK_VERSION}..."
             curl -fLo /tmp/ndk.zip \
               "https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
             unzip -q /tmp/ndk.zip -d /github/home/lib/
@@ -42,87 +41,82 @@ jobs:
 
       - name: Create output directories
         shell: bash
-        run: |
-          mkdir -p output/${{ matrix.arch }}
-          mkdir -p output/repo
+        run: mkdir -p output/${{ matrix.arch }} output/repo
 
-      - name: Setup proxy server to fix Recommends
+      - name: Download and fix Packages index
         shell: bash
         run: |
-          pip install flask requests --quiet --break-system-packages 2>/dev/null || \
-          pip3 install flask requests --quiet --break-system-packages 2>/dev/null || \
-          apt-get install -y python3-flask python3-requests -qq 2>/dev/null || true
+          ARCH="${{ matrix.arch }}"
+          MIRROR="/tmp/mirror"
+          mkdir -p "$MIRROR/dists/stable/main/binary-${ARCH}"
+          mkdir -p "$MIRROR/dists/stable/main/binary-all"
 
-          # Cria o servidor proxy
-          cat > /tmp/proxy_server.py << 'PYEOF'
-          import threading
+          curl -fsSL "${REPO_URL}/dists/stable/Release" -o "$MIRROR/dists/stable/Release"
+          curl -fsSL "${REPO_URL}/dists/stable/InRelease" -o "$MIRROR/dists/stable/InRelease"
+          curl -fsSL "${REPO_URL}/dists/stable/main/binary-all/Packages" \
+            -o "$MIRROR/dists/stable/main/binary-all/Packages"
+          curl -fsSL "${REPO_URL}/dists/stable/main/binary-${ARCH}/Packages" \
+            -o "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
+
+          # Remove Recommends problemáticos usando sed
+          sed -i '/^Recommends:.*command-not-found/d' \
+            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
+          sed -i 's/Recommends: command-not-found, bash-completion//' \
+            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
+          sed -i 's/Recommends: bash-completion, command-not-found//' \
+            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
+          sed -i 's/, command-not-found//' \
+            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
+          sed -i 's/command-not-found, //' \
+            "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
+
+          echo "=== Verificando bash no Packages ==="
+          grep -A 8 "^Package: bash$" "$MIRROR/dists/stable/main/binary-${ARCH}/Packages"
+
+      - name: Start mirror server
+        shell: bash
+        run: |
+          REAL_REPO="${REPO_URL}"
+          cat > /tmp/server.py << EOF
+          import os, urllib.request, urllib.error
           from http.server import HTTPServer, BaseHTTPRequestHandler
-          import urllib.request
-          import urllib.error
 
-          REAL_REPO = "https://yatonorai.github.io/terminal-packages/apt/termux-main"
-          REMOVE_RECOMMENDS_FOR = ["bash"]
+          REAL = "${REAL_REPO}"
+          MIRROR = "/tmp/mirror"
 
-          class ProxyHandler(BaseHTTPRequestHandler):
-              def log_message(self, format, *args):
-                  pass  # silencia logs
-
+          class H(BaseHTTPRequestHandler):
+              def log_message(self, f, *a): pass
               def do_GET(self):
-                  url = REAL_REPO + self.path
-                  try:
-                      with urllib.request.urlopen(url) as resp:
-                          data = resp.read()
-                          content_type = resp.headers.get("Content-Type", "application/octet-stream")
+                  local = MIRROR + self.path
+                  if os.path.isfile(local):
+                      data = open(local, "rb").read()
+                  else:
+                      try:
+                          data = urllib.request.urlopen(REAL + self.path).read()
+                      except:
+                          self.send_response(404)
+                          self.end_headers()
+                          return
+                  self.send_response(200)
+                  self.send_header("Content-Length", len(data))
+                  self.end_headers()
+                  self.wfile.write(data)
 
-                      # Se for arquivo Packages, remove Recommends do bash
-                      if "Packages" in self.path and not self.path.endswith(".xz"):
-                          lines = data.decode("utf-8").split("\n")
-                          result = []
-                          in_bash = False
-                          for line in lines:
-                              if line.startswith("Package: bash"):
-                                  in_bash = True
-                              elif line.startswith("Package: ") and in_bash:
-                                  in_bash = False
-                              if in_bash and line.startswith("Recommends:"):
-                                  continue  # remove Recommends do bash
-                              result.append(line)
-                          data = "\n".join(result).encode("utf-8")
-
-                      self.send_response(200)
-                      self.send_header("Content-Type", content_type)
-                      self.send_header("Content-Length", len(data))
-                      self.end_headers()
-                      self.wfile.write(data)
-                  except urllib.error.HTTPError as e:
-                      self.send_response(e.code)
-                      self.end_headers()
-                  except Exception as e:
-                      self.send_response(502)
-                      self.end_headers()
-
-          server = HTTPServer(("0.0.0.0", 8080), ProxyHandler)
-          print("Proxy server started on port 8080")
-          server.serve_forever()
-          PYEOF
-
-          python3 /tmp/proxy_server.py &
-          sleep 3
-          echo "Proxy iniciado!"
-          curl -s "http://localhost:8080/dists/stable/main/binary-aarch64/Packages" | grep -A 5 "^Package: bash"
+          HTTPServer(("0.0.0.0", 8080), H).serve_forever()
+          EOF
+          python3 /tmp/server.py &
+          sleep 2
+          echo "Servidor iniciado!"
+          curl -s "http://localhost:8080/dists/stable/main/binary-${{ matrix.arch }}/Packages" \
+            | grep -A 5 "^Package: bash$"
 
       - name: Generate bootstrap archive (debug)
         shell: bash
-        run: |
-          bash generate-bootstrap-archive.sh \
-            -r "http://localhost:8080"
+        run: bash generate-bootstrap-archive.sh -r "http://localhost:8080"
 
       - name: Generate bootstrap archive (release)
         shell: bash
-        run: |
-          bash generate-bootstrap-archive.sh \
-            -g \
-            -r "http://localhost:8080"
+        run: bash generate-bootstrap-archive.sh -g -r "http://localhost:8080"
 
       - name: Upload bootstrap archives
         uses: actions/upload-artifact@v4
