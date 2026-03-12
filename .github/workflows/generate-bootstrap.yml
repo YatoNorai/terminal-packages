@@ -46,44 +46,70 @@ jobs:
           mkdir -p output/${{ matrix.arch }}
           mkdir -p output/repo
 
-      - name: Remove Recommends from Packages index
+      - name: Setup proxy server to fix Recommends
         shell: bash
         run: |
-          # Baixa o índice de pacotes
-          mkdir -p /tmp/apt-fix
-          curl -fsSL "${REPO_URL}/dists/stable/main/binary-${{ matrix.arch }}/Packages" \
-            -o /tmp/apt-fix/Packages
+          pip install flask requests --quiet --break-system-packages 2>/dev/null || \
+          pip3 install flask requests --quiet --break-system-packages 2>/dev/null || \
+          apt-get install -y python3-flask python3-requests -qq 2>/dev/null || true
 
-          # Remove linhas Recommends que referenciam pacotes não disponíveis
-          sed -i '/^Recommends:.*command-not-found/d' /tmp/apt-fix/Packages
-          sed -i '/^Recommends:.*bash-completion/d' /tmp/apt-fix/Packages
+          # Cria o servidor proxy
+          cat > /tmp/proxy_server.py << 'PYEOF'
+          import threading
+          from http.server import HTTPServer, BaseHTTPRequestHandler
+          import urllib.request
+          import urllib.error
 
-          echo "Packages corrigido:"
-          grep -A 5 "^Package: bash$" /tmp/apt-fix/Packages
+          REAL_REPO = "https://yatonorai.github.io/terminal-packages/apt/termux-main"
+          REMOVE_RECOMMENDS_FOR = ["bash"]
 
-          # Substitui o script generate-bootstraps para usar o Packages local
-          # Cria um servidor HTTP local temporário para servir o Packages corrigido
-          mkdir -p /tmp/fake-repo/dists/stable/main/binary-${{ matrix.arch }}
-          mkdir -p /tmp/fake-repo/dists/stable/main/binary-all
-          mkdir -p /tmp/fake-repo/pool/main
+          class ProxyHandler(BaseHTTPRequestHandler):
+              def log_message(self, format, *args):
+                  pass  # silencia logs
 
-          # Copia Packages corrigido
-          cp /tmp/apt-fix/Packages \
-            "/tmp/fake-repo/dists/stable/main/binary-${{ matrix.arch }}/Packages"
+              def do_GET(self):
+                  url = REAL_REPO + self.path
+                  try:
+                      with urllib.request.urlopen(url) as resp:
+                          data = resp.read()
+                          content_type = resp.headers.get("Content-Type", "application/octet-stream")
 
-          # Baixa outros Packages necessários
-          curl -fsSL "${REPO_URL}/dists/stable/main/binary-all/Packages" \
-            -o /tmp/fake-repo/dists/stable/main/binary-all/Packages 2>/dev/null || true
-          curl -fsSL "${REPO_URL}/dists/stable/InRelease" \
-            -o /tmp/fake-repo/dists/stable/InRelease 2>/dev/null || true
-          curl -fsSL "${REPO_URL}/dists/stable/Release" \
-            -o /tmp/fake-repo/dists/stable/Release 2>/dev/null || true
+                      # Se for arquivo Packages, remove Recommends do bash
+                      if "Packages" in self.path and not self.path.endswith(".xz"):
+                          lines = data.decode("utf-8").split("\n")
+                          result = []
+                          in_bash = False
+                          for line in lines:
+                              if line.startswith("Package: bash"):
+                                  in_bash = True
+                              elif line.startswith("Package: ") and in_bash:
+                                  in_bash = False
+                              if in_bash and line.startswith("Recommends:"):
+                                  continue  # remove Recommends do bash
+                              result.append(line)
+                          data = "\n".join(result).encode("utf-8")
 
-          # Inicia servidor HTTP local na porta 8080
-          cd /tmp/fake-repo
-          python3 -m http.server 8080 &
-          echo "Servidor local iniciado!"
-          sleep 2
+                      self.send_response(200)
+                      self.send_header("Content-Type", content_type)
+                      self.send_header("Content-Length", len(data))
+                      self.end_headers()
+                      self.wfile.write(data)
+                  except urllib.error.HTTPError as e:
+                      self.send_response(e.code)
+                      self.end_headers()
+                  except Exception as e:
+                      self.send_response(502)
+                      self.end_headers()
+
+          server = HTTPServer(("0.0.0.0", 8080), ProxyHandler)
+          print("Proxy server started on port 8080")
+          server.serve_forever()
+          PYEOF
+
+          python3 /tmp/proxy_server.py &
+          sleep 3
+          echo "Proxy iniciado!"
+          curl -s "http://localhost:8080/dists/stable/main/binary-aarch64/Packages" | grep -A 5 "^Package: bash"
 
       - name: Generate bootstrap archive (debug)
         shell: bash
