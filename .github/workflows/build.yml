@@ -74,6 +74,16 @@ jobs:
             -r "${REPO_URL}" \
             -s adfa-dev-team.gpg
 
+      - name: Rename deb files (remove invalid characters)
+        if: always()
+        run: |
+          find output/${{ matrix.arch }}/ -name "*.deb" | while read f; do
+            newname=$(echo "$f" | tr ":><|*?\\"" "_")
+            if [ "$f" != "$newname" ]; then
+              mv "$f" "$newname"
+            fi
+          done
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         if: always()
