@@ -21,15 +21,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ────────────────────────────────────────────────
-  # Job 1 — Build packages for each architecture
-  # ────────────────────────────────────────────────
   build:
     name: Build (${{ matrix.arch }})
     runs-on: ubuntu-latest
     timeout-minutes: 360
     container:
       image: ghcr.io/termux/package-builder:latest
+      env:
+        ANDROID_HOME: /github/home/lib/android-sdk
+        ANDROID_SDK_ROOT: /github/home/lib/android-sdk
 
     strategy:
       fail-fast: false
@@ -42,6 +42,8 @@ jobs:
       REPO_URL: "https://YatoNorai.github.io/terminal-packages/apt/termux-main"
       NDK_VERSION: "r29"
       NDK_DIR: "/github/home/lib/android-ndk-r29"
+      ANDROID_HOME: "/github/home/lib/android-sdk"
+      ANDROID_SDK_ROOT: "/github/home/lib/android-sdk"
 
     steps:
       - name: Checkout repository (with submodules)
@@ -49,25 +51,50 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Android NDK
+      - name: Setup Android NDK and SDK
+        shell: bash
         run: |
           mkdir -p /github/home/lib
+
+          # ── NDK ──
           if [ ! -d "${NDK_DIR}" ]; then
             echo "Downloading Android NDK ${NDK_VERSION}..."
             curl -fLo /tmp/ndk.zip \
               "https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip"
-            echo "Extracting NDK..."
             unzip -q /tmp/ndk.zip -d /github/home/lib/
             rm /tmp/ndk.zip
-            echo "NDK installed at ${NDK_DIR}"
-          else
-            echo "NDK already present."
+            echo "NDK installed."
           fi
-          ls "${NDK_DIR}"
+
+          # ── SDK ──
+          if [ ! -d "${ANDROID_HOME}/cmdline-tools/latest" ]; then
+            echo "Downloading Android SDK command-line tools..."
+            curl -fLo /tmp/sdk-tools.zip \
+              "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+            mkdir -p "${ANDROID_HOME}/cmdline-tools"
+            unzip -q /tmp/sdk-tools.zip -d "${ANDROID_HOME}/cmdline-tools/"
+            mv "${ANDROID_HOME}/cmdline-tools/cmdline-tools" \
+               "${ANDROID_HOME}/cmdline-tools/latest" 2>/dev/null || true
+            rm /tmp/sdk-tools.zip
+          fi
+
+          export PATH="${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${PATH}"
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platform-tools" "build-tools;35.0.0" "platforms;android-35" > /dev/null 2>&1 || true
+
+          # Escreve local.properties para que o Gradle encontre o SDK
+          echo "sdk.dir=${ANDROID_HOME}" > /github/home/.termux-build/termux-tools/local.properties 2>/dev/null || true
+
+          echo "Setup completo!"
+          echo "ANDROID_HOME=${ANDROID_HOME}"
+          ls "${ANDROID_HOME}" || true
 
       - name: Build packages
+        shell: bash
         run: |
           mkdir -p output
+          export ANDROID_HOME=/github/home/lib/android-sdk
+          export ANDROID_SDK_ROOT=/github/home/lib/android-sdk
           bash -x build.sh \
             -a "${{ matrix.arch }}" \
             -p "com.yato.fl_ide" \
@@ -76,11 +103,15 @@ jobs:
 
       - name: Rename deb files (remove invalid characters)
         if: always()
+        shell: bash
         run: |
-          find output/${{ matrix.arch }}/ -name "*.deb" | while read f; do
-            newname=$(echo "$f" | tr ":><|*?\\"" "_")
-            if [ "$f" != "$newname" ]; then
-              mv "$f" "$newname"
+          find "output/${{ matrix.arch }}/" -name "*.deb" -print0 | while IFS= read -r -d '' f; do
+            dir=$(dirname "$f")
+            base=$(basename "$f")
+            newbase="${base//:/_}"
+            if [ "$base" != "$newbase" ]; then
+              echo "Renaming: $base -> $newbase"
+              mv "$f" "$dir/$newbase"
             fi
           done
 
@@ -92,9 +123,6 @@ jobs:
           path: output/${{ matrix.arch }}/
           retention-days: 7
 
-  # ────────────────────────────────────────────────
-  # Job 2 — Generate & sign the APT repository
-  # ────────────────────────────────────────────────
   generate-apt-repo:
     name: Generate APT Repository
     runs-on: ubuntu-latest
@@ -123,10 +151,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            gnupg \
-            wget \
-            ca-certificates \
-            python3
+            gnupg wget ca-certificates python3
 
       - name: Import GPG signing key
         env:
@@ -136,8 +161,7 @@ jobs:
           gpg --list-secret-keys
 
       - name: Generate APT repository
-        run: |
-          bash generate-apt-repo.sh
+        run: bash generate-apt-repo.sh
 
       - name: Sign the APT repository
         env:
@@ -145,8 +169,7 @@ jobs:
           GPG_KEY_PASSPHRASE: ${{ secrets.GPG_KEY_PASSPHRASE }}
         run: |
           echo "$GPG_KEY_PASSPHRASE" | gpg \
-            --batch \
-            --yes \
+            --batch --yes \
             --passphrase-fd 0 \
             --pinentry-mode loopback \
             --digest-algo SHA256 \
@@ -162,9 +185,6 @@ jobs:
           path: output/repo/
           retention-days: 7
 
-  # ────────────────────────────────────────────────
-  # Job 3 — Publish repository to branch packages
-  # ────────────────────────────────────────────────
   publish:
     name: Publish Repository
     runs-on: ubuntu-latest
@@ -207,9 +227,6 @@ jobs:
             echo "No changes to publish."
           fi
 
-  # ────────────────────────────────────────────────
-  # Job 4 — Generate bootstrap archives
-  # ────────────────────────────────────────────────
   bootstrap:
     name: Generate Bootstrap Archives
     runs-on: ubuntu-latest
@@ -229,6 +246,7 @@ jobs:
           submodules: recursive
 
       - name: Setup Android NDK
+        shell: bash
         run: |
           mkdir -p /github/home/lib
           if [ ! -d "${NDK_DIR}" ]; then
@@ -251,12 +269,12 @@ jobs:
           path: output/arm/
 
       - name: Generate bootstrap archives (debug)
-        run: |
-          bash generate-bootstrap-archive.sh
+        shell: bash
+        run: bash generate-bootstrap-archive.sh
 
       - name: Generate bootstrap archives (release)
-        run: |
-          bash generate-bootstrap-archive.sh -g
+        shell: bash
+        run: bash generate-bootstrap-archive.sh -g
 
       - name: Upload bootstrap archives
         uses: actions/upload-artifact@v4
