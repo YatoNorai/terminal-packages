@@ -6,7 +6,7 @@ Version: 2.8.1-2
 Homepage: https://packages.debian.org/apt
 Depends: tor, apt (= 2.8.1-2)
 Description: APT transport for anonymous package downloads via Tor
-Filename: pool/main/apt-transport-tor_2.8.1-2_all.deb
+Filename: dists/stable/main/binary-all/apt-transport-tor_2.8.1-2_all.deb
 Size: 916
 MD5Sum: f9f46886929f2f5c300014d7ee7d1480
 SHA1: 253fa4ad810d6e2035e05ddc3ce13d1f1366d4b9
@@ -21,12 +21,12 @@ Version: 1:2025.12.02
 Homepage: https://curl.se/docs/caextract.html
 Depends: ca-certificates (= 1:2025.12.02)
 Description: Common CA certificates (java keystore format)
-Filename: pool/main/ca-certificates-java_1_2025.12.02_all.deb
+Filename: dists/stable/main/binary-all/ca-certificates-java_1_2025.12.02_all.deb
 Size: 113816
-MD5Sum: 9e28fdc5c2f61c02a43cb2109348fb03
-SHA1: a3ed1b087106aba00b84f1c2b30ca21819696ca3
-SHA256: 120e6f4a7bfde3806313d4fb3beb77e27b55427840ac84ba911e286b54c10245
-SHA512: dc6457fa075b68494510262a21a744194456933adc9fe41b6411f356c52564522dccfbf47c78cddd31d238c258655770ab9cf4a4a1238c35caf589d1057aaa67
+MD5Sum: df4657dc4e0c1f25f7c1c50f304c505e
+SHA1: c8a732ad47abd841aacfc59ade9bd9201f8b23ee
+SHA256: 225421407be5010d7a94a7ea5a2c48fb0a9b957dc727dfaa8ef473406508b8d9
+SHA512: 22a097b3666feadb07ad8f46ebc1d9d0009f51650dc5d893aec6dfa5fa285af384f22e61112d520af24a2947907575f3f41b4bef09fa3cc2d19b538df7e3f4a0
 
 Package: ca-certificates
 Architecture: all
@@ -35,7 +35,7 @@ Maintainer: @termux
 Version: 1:2025.12.02
 Homepage: https://curl.se/docs/caextract.html
 Description: Common CA certificates
-Filename: pool/main/ca-certificates_1_2025.12.02_all.deb
+Filename: dists/stable/main/binary-all/ca-certificates_1_2025.12.02_all.deb
 Size: 124244
 MD5Sum: d856c320b0f925c452dc19d08c5b783e
 SHA1: fce3a483a519c0f1f312bfd57fc8d68cae1f8971
@@ -51,7 +51,7 @@ Homepage: https://www.oasis-open.org/docbook/
 Breaks: docbook-xsl (<= 1.79.2-1)
 Depends: libxml2-utils
 Description: A widely used XML scheme for writing documentation and help
-Filename: pool/main/docbook-xml_5.1-1_all.deb
+Filename: dists/stable/main/binary-all/docbook-xml_5.1-1_all.deb
 Size: 78204
 MD5Sum: 7fbb0170badf02cc7f9feb117d07e810
 SHA1: b71b8baa2c7f944903e6db03c45aa521cb5e5760
@@ -60,18 +60,18 @@ SHA512: de253e2dd252b98dc9438bb1d6df948b33a605528f3e6b845507c475136f12cb65de24ff
 
 Package: docbook-xsl
 Architecture: all
-Installed-Size: 33404
+Installed-Size: 33412
 Maintainer: @termux
 Version: 1.79.2-4
 Homepage: https://docbook.org/
 Depends: docbook-xml (>= 5.1), libxml2-utils, xsltproc
 Description: XML stylesheets for Docbook-xml transformations
-Filename: pool/main/docbook-xsl_1.79.2-4_all.deb
+Filename: dists/stable/main/binary-all/docbook-xsl_1.79.2-4_all.deb
 Size: 1237416
-MD5Sum: e47c91fa0610a13d942551fa2f2d6cf4
-SHA1: 64d1f962dc4a14624544101e3f78beca465d1447
-SHA256: cc6716049c03742d66b2c10f8f9c0cebab2b9df6d55deb83a539f0cfcb9965b9
-SHA512: eee09fd759a45d74f25e2bd08beca2d2d8fa8062688295df7ae00cd444f7c9a2665af664827c131fdef478fc7d4eb15c0fb9d253f2a21a4126428a9a167da663
+MD5Sum: ff5a06c6a9527d449b1ba49c5be983fa
+SHA1: d7561e30835cdaf4af4d2d956a9c39636dbb2949
+SHA256: eaa0296fe29cb08f87bd02c98249dcd27cc728f3c12016660956d935c1dbff23
+SHA512: 13cba152a08e8ff662e167447c9b44a317f8f68a1660025a900ac6cf03e286c69428b53c37d19b65445a826903d9377a8c62c83ac8c0b55efcf3d2e7cbbcdf76
 
 Package: dpkg-perl
 Architecture: all
@@ -81,7 +81,7 @@ Version: 1.22.6-5
 Homepage: https://packages.debian.org/dpkg
 Depends: perl, clang, make, dpkg (= 1.22.6-5)
 Description: Perl modules for dpkg
-Filename: pool/main/dpkg-perl_1.22.6-5_all.deb
+Filename: dists/stable/main/binary-all/dpkg-perl_1.22.6-5_all.deb
 Size: 126316
 MD5Sum: 5fff0273cb6b0876c93bc981192b5a00
 SHA1: 3da1ad214009962d29c7db02b725412b211c7808
@@ -96,7 +96,7 @@ Version: 1.22.6-5
 Homepage: https://packages.debian.org/dpkg
 Depends: dpkg-perl, dpkg (= 1.22.6-5)
 Description: Creates Packages index files
-Filename: pool/main/dpkg-scanpackages_1.22.6-5_all.deb
+Filename: dists/stable/main/binary-all/dpkg-scanpackages_1.22.6-5_all.deb
 Size: 6500
 MD5Sum: 07358b9eb227c69b74d8af053bf0ba17
 SHA1: 3910eb1f2347087c954ad82ff2e2e7ac5603451e
@@ -111,7 +111,7 @@ Version: 2.52.0
 Homepage: https://git-scm.com/
 Depends: subversion-perl, git (= 2.52.0)
 Description: Convert between Git and Subversion repositories
-Filename: pool/main/git-svn_2.52.0_all.deb
+Filename: dists/stable/main/binary-all/git-svn_2.52.0_all.deb
 Size: 75548
 MD5Sum: 1a9c1ffdf0cac41ef6b1dc0a4e6cabae
 SHA1: a3fc53b4b10cadc7be3e79866007cf0898a25ce3
@@ -126,7 +126,7 @@ Version: 2.86.3-1
 Homepage: https://developer.gnome.org/glib/
 Depends: glib (= 2.86.3-1)
 Description: glib for host (NOT for Termux)
-Filename: pool/main/glib-cross_2.86.3-1_all.deb
+Filename: dists/stable/main/binary-all/glib-cross_2.86.3-1_all.deb
 Size: 12125460
 MD5Sum: 15204cf80a593e3353ac22d014848d74
 SHA1: 850dff649f81718a8b15332312f28352b58d82a5
@@ -140,7 +140,7 @@ Maintainer: @termux
 Version: 21.0.10
 Homepage: https://openjdk.java.net
 Description: Source files for openjdk-21
-Filename: pool/main/openjdk-21-source_21.0.10_all.deb
+Filename: dists/stable/main/binary-all/openjdk-21-source_21.0.10_all.deb
 Size: 48643660
 MD5Sum: c5e0deac6473cd3a8719345e46c15ffe
 SHA1: 0b76ee517b0a6f08e59ae4fa801e949171cd7e68
@@ -157,7 +157,7 @@ Depends: python (= 3.12.12-1)
 Breaks: python (<< 3.11.1-3)
 Replaces: python (<< 3.11.1-3)
 Description: Wheels for Python ensurepip
-Filename: pool/main/python-ensurepip-wheels_3.12.12-1_all.deb
+Filename: dists/stable/main/binary-all/python-ensurepip-wheels_3.12.12-1_all.deb
 Size: 1801588
 MD5Sum: f53b5472037ec343c556808c959c262a
 SHA1: 2b32b77f5e14639c9bd745d671f3409501fe1111
@@ -173,7 +173,7 @@ Homepage: https://pip.pypa.io/
 Breaks: python (<< 3.11.1-1)
 Depends: clang, make, pkg-config, python (>= 3.11.1-1)
 Description: The PyPA recommended tool for installing Python packages
-Filename: pool/main/python-pip_25.3_all.deb
+Filename: dists/stable/main/binary-all/python-pip_25.3_all.deb
 Size: 1170416
 MD5Sum: b7425c6a66b50114bbc06f2f6c32a7ed
 SHA1: 81a352ceaf77e3ec6a7273429948c09653348e4d
@@ -191,7 +191,7 @@ Breaks: xcb-proto (<< 1.15.2)
 Recommends: python
 Replaces: xcb-proto (<< 1.15.2)
 Description: The xcbgen Python module
-Filename: pool/main/python-xcbgen_1.17.0-1_all.deb
+Filename: dists/stable/main/binary-all/python-xcbgen_1.17.0-1_all.deb
 Size: 15184
 MD5Sum: 5fcaaa6d6a033c80f30fd02431e1eb40
 SHA1: e1890b4caf89ad9c1ba1ff993c48c58ec4fa0785
@@ -206,7 +206,7 @@ Version: 3.4.1-2
 Homepage: https://www.ruby-lang.org/
 Depends: ruby (= 3.4.1-2)
 Description: Ruby documentation index
-Filename: pool/main/ruby-ri_3.4.1-2_all.deb
+Filename: dists/stable/main/binary-all/ruby-ri_3.4.1-2_all.deb
 Size: 1851124
 MD5Sum: 8d1c525ec0af5c8d35a245cc63e6b583
 SHA1: a3a4a439995564dfcd68397b9c136d5045c45965
@@ -221,7 +221,7 @@ Version: 0.8.0-2
 Homepage: https://github.com/termux/TermuxAm
 Conflicts: termux-tools (<< 0.51)
 Description: Android Oreo-compatible am command reimplementation
-Filename: pool/main/termux-am_0.8.0-2_all.deb
+Filename: dists/stable/main/binary-all/termux-am_0.8.0-2_all.deb
 Size: 577296
 MD5Sum: 6b174b19fbea3fac3ab5389f27e65929
 SHA1: 63a888fa5161118841844ab32defe4f1ec20bf71
@@ -236,7 +236,7 @@ Version: 3.13
 Homepage: https://github.com/termux
 Essential: yes
 Description: GPG public keys for the official Termux repositories
-Filename: pool/main/termux-keyring_3.13_all.deb
+Filename: dists/stable/main/binary-all/termux-keyring_3.13_all.deb
 Size: 3360
 MD5Sum: 917a06ec63baf52d9a8a7ffa5128d92f
 SHA1: bf7e2c4226e73c2016bdaefbad7aa271dc2268f3
@@ -251,7 +251,7 @@ Version: 2.1
 Homepage: https://termux.dev
 Essential: yes
 Description: Contains LICENSE files for common licenses
-Filename: pool/main/termux-licenses_2.1_all.deb
+Filename: dists/stable/main/binary-all/termux-licenses_2.1_all.deb
 Size: 52596
 MD5Sum: c37c3858ea9ec7ed339cd064636baa68
 SHA1: ff058b32ec8aa9044dc92a90eb6affa20f9f247d
@@ -265,7 +265,7 @@ Maintainer: @termux
 Version: 2.37-8
 Homepage: https://dejavu-fonts.github.io/
 Description: Font family based on the Bitstream Vera Fonts with a wider range of characters
-Filename: pool/main/ttf-dejavu_2.37-8_all.deb
+Filename: dists/stable/main/binary-all/ttf-dejavu_2.37-8_all.deb
 Size: 2460672
 MD5Sum: 30226ac2d1b265a9700566c6e6f9485d
 SHA1: d1b21036f687f01758b147fdad6060e99ba27e3c
@@ -280,7 +280,7 @@ Version: 7.2-4
 Homepage: https://www.gnu.org/software/texinfo/
 Depends: texinfo (= 7.2-4)
 Description: Update or create index file from all installed info files in directory
-Filename: pool/main/update-info-dir_7.2-4_all.deb
+Filename: dists/stable/main/binary-all/update-info-dir_7.2-4_all.deb
 Size: 2468
 MD5Sum: 64b0c744c7efaa4a6a15f6b2dec02b1d
 SHA1: 168d0cc4345f5c2b4d5fe7199c344f9c39583621
@@ -296,7 +296,7 @@ Homepage: https://xcb.freedesktop.org/
 Conflicts: xcbproto
 Replaces: xcbproto
 Description: XML-XCB protocol descriptions
-Filename: pool/main/xcb-proto_1.17.0-1_all.deb
+Filename: dists/stable/main/binary-all/xcb-proto_1.17.0-1_all.deb
 Size: 78600
 MD5Sum: 6e42a37499ad1a260f954b2416ac3e3f
 SHA1: 6130c18471529b2949bcc41ea0aab8d9ea5c5ac2
@@ -310,7 +310,7 @@ Maintainer: @termux
 Version: 1.20.2
 Homepage: https://xorg.freedesktop.org/
 Description: X.Org Autotools macros
-Filename: pool/main/xorg-util-macros_1.20.2_all.deb
+Filename: dists/stable/main/binary-all/xorg-util-macros_1.20.2_all.deb
 Size: 21960
 MD5Sum: 7add4c47210fd9d88f6a8c28da75e05f
 SHA1: d5404d1053c2709e58137f69413be09d65cf0e4d
@@ -327,7 +327,7 @@ Depends: xorg-util-macros
 Conflicts: x11-proto
 Replaces: x11-proto
 Description: X.Org X11 Protocol headers
-Filename: pool/main/xorgproto_2025.1_all.deb
+Filename: dists/stable/main/binary-all/xorgproto_2025.1_all.deb
 Size: 249668
 MD5Sum: f3c9d40ab67fded11baf31817a9f8e49
 SHA1: a87250ddf1917beb97eec43e9cd9ee654e022228
@@ -341,7 +341,7 @@ Maintainer: @termux
 Version: 1.6.0
 Homepage: https://xorg.freedesktop.org/
 Description: X transport library
-Filename: pool/main/xtrans_1.6.0_all.deb
+Filename: dists/stable/main/binary-all/xtrans_1.6.0_all.deb
 Size: 39872
 MD5Sum: f671a465a15c3892d74377f655f4799b
 SHA1: 7cb7227f851568909bdc74024f5c0a67dfd8e8d3
